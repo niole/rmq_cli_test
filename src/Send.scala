@@ -1,6 +1,5 @@
 import com.rabbitmq.client.ConnectionFactory
 import com.rabbitmq.client.Connection
-import com.rabbitmq.client.Channel
 
 import scala.util.Using
 import scala.util.control.NonFatal
@@ -15,9 +14,7 @@ object Send {
     try {
       Using.Manager { use =>
         val connection = use(factory.newConnection())
-        val channel = use(connection.createChannel())
-
-        channel.queueDeclare(QUEUE_NAME, false, false, false, null)
+        val channel = use(ChannelFactory(connection))
 
         channel.basicPublish("", QUEUE_NAME, null, message.getBytes())
 

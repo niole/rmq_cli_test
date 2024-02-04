@@ -5,10 +5,24 @@
 
 //> using file ./Send.scala
 //> using file ./Recv.scala
+//> using file ./Channel.scala
+
+import scala.concurrent.{Future, ExecutionContext}
 
 args.toList match {
   case Nil =>
     Recv()
+  case List("2") =>
+    given ExecutionContext = ExecutionContext.global
+    Future {
+      Recv("worker3")
+    }
+    Future {
+      Recv("worker2")
+    }
+    Recv("worker1")
   case msgs =>
-    Send(msgs.mkString(" "))
+    msgs.foreach { msg =>
+      Send(msg)
+    }
 }
