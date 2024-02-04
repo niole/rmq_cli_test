@@ -2,23 +2,21 @@ import com.rabbitmq.client.{Connection, DeliverCallback, ConnectionFactory, Deli
 
 object Recv {
 
-  private val QUEUE_NAME: String = "hello"
-
   def apply(workerName: String = "worker1"): Unit = {
     val factory = new ConnectionFactory();
     factory.setHost("localhost");
     val connection = factory.newConnection();
-    val channel = ChannelFactory(connection)
+    val channelHoder = ChannelFactory(connection, ChannelFactory.DURABLE_Q_NAME, true)
 
     val deliverCallback: DeliverCallback = { (consumerTag: String, delivery: Delivery) =>
       val message = new String(delivery.getBody(), "UTF-8")
       System.out.println(s" [x] $workerName Received '" + message + "'");
 
       doWork(message)
-      channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false)
+      channelHoder.channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false)
     };
 
-    channel.basicConsume(QUEUE_NAME, false, deliverCallback, { consumerTag => })
+    channelHoder.channel.basicConsume(channelHoder.name, false, deliverCallback, { consumerTag => })
 
     System.out.println(s" [*] $workerName Waiting for messages. To exit press CTRL+C")
   }

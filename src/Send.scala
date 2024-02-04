@@ -5,8 +5,6 @@ import scala.util.Using
 import scala.util.control.NonFatal
 
 object Send {
-  private val QUEUE_NAME: String = "hello"
-
   def apply(message: String): Unit = {
     val factory = new ConnectionFactory()
     factory.setHost("localhost")
@@ -14,9 +12,10 @@ object Send {
     try {
       Using.Manager { use =>
         val connection = use(factory.newConnection())
-        val channel = use(ChannelFactory(connection))
+        val channelHolder = ChannelFactory(connection, ChannelFactory.DURABLE_Q_NAME, true)
+        use(channelHolder.channel)
 
-        channel.basicPublish("", QUEUE_NAME, null, message.getBytes())
+        channelHolder.sendMessage(message)
 
         println(" [x] Sent '" + message + "'")
       }
