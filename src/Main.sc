@@ -7,8 +7,8 @@
 //> using file ./Recv.scala
 
 args.toList match {
-  case List(message) =>
-    Send(message)
-  case _ =>
+  case Nil =>
     Recv()
+  case msgs =>
+    Send(msgs.mkString(" "))
 }
